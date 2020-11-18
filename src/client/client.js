@@ -100,4 +100,24 @@ function HTTPClient(token, baseServer, port, headers={}) {
     };
 }
 
-module.exports = { HTTPClient };
+function isClient(c) {
+    return c != null
+      && typeof c.get === 'function'
+      && typeof c.post === 'function'
+      && typeof c.delete === 'function';
+}
+
+function fromArgs(tokenOrClient, baseServer, port, headers={}) {
+    if (isClient(tokenOrClient)) {
+        return tokenOrClient;
+    } else {
+        // workaround to allow backwards compatibility for multiple headers
+        let tokenHeader = tokenOrClient;
+        if (typeof (tokenHeader) == 'string') {
+            tokenHeader = {"X-Indexer-API-Token": tokenHeader};
+        }
+        return new HTTPClient(tokenHeader, baseServer, port, headers);
+    }
+}
+
+module.exports = { HTTPClient, fromArgs };
